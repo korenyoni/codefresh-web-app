@@ -4,7 +4,7 @@ import "github.com/gin-gonic/gin"
 
 func main() {
 	r := gin.Default()
-	r.StaticFile("/favicon.png", "./assets/favicon.png")
+	r.StaticFile("/favicon.ico", "./assets/favicon.ico")
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",

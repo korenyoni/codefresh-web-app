@@ -1,0 +1,68 @@
+<!-- THIS FILE HEAVILY BORROWS FROM https://github.com/cloudposse/default-backend -->
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600" media="screen" rel="stylesheet"/>
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" media="screen"
+          rel="stylesheet"/>
+    <link href="style.css" media="screen"
+          rel="stylesheet"/>
+</head>
+<body class="plain page-wrapper background-color background-image">
+<div class="content-container">
+    <div class="head-line">
+        <img src="logo.png" alt="Logo">
+    </div>
+    <br>
+    <div class="subheader primary-text-color">
+        This app is built and deployed using Codefresh<br>
+    </div>
+    <hr>
+    <div class="clearfix"></div>
+    <div class="context primary-text-color">
+        <!-- doesn't use context_content because it's ALWAYS the same thing -->
+        <p>
+            Codefresh is a software delivery platform,<br/>
+            not just a CI/CD tool.
+        </p>
+    </div>
+    <div class="buttons-container">
+        <a class="border-button" href="{{ .codefreshURI }}" target="_blank">Try Codefresh</a>
+        <a class="border-button" href="{{ .sourceCodeURI }}" target="_blank">See Source Code</a>
+    </div>
+</div>
+<script>
+    function Page(e, t, n) {
+        this.$container = $(e), this.$contentContainer = this.$container.find(n == "sign" ? ".sign-container" : ".content-container"), this.pageType = t, this.templateName = n
+    }
+
+    Page.prototype.centerContent = function () {
+        var e = this.$container.outerHeight(), t = this.$contentContainer.outerHeight(), n = (e - t) / 2,
+            r = this.templateName == "sign" ? -100 : 0;
+        this.$contentContainer.css("top", n + r)
+    }
+
+    Page.prototype.initialize = function () {
+        var e = this;
+        this.centerContent(), this.$container.on("resize", function (t) {
+            t.preventDefault(), t.stopPropagation(), e.centerContent()
+        }), this.templateName == "plain" && window.setTimeout(function () {
+            e.$contentContainer.addClass("in")
+        }, 500), this.templateName == "sign" && $(".sign-container").animate({textIndent: 0}, {
+            step: function (e) {
+                $(this).css({transform: "rotate(" + e + "deg)", "transform-origin": "top center"})
+            }, duration: 1e3, easing: "easeOutBounce"
+        })
+    }
+
+    var ep = new Page('body', "200", "plain");
+    ep.initialize();
+
+    $(window).on('resize', function () {
+        $('body').trigger('resize')
+    });
+</script>
+</body>
+</html>

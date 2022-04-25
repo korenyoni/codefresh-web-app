@@ -16,3 +16,8 @@ steps:
     image: "golang:1.18"
     commands:
       - go test -v
+    when:
+      steps:
+        - name: main_clone
+          on:
+            - success

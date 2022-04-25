@@ -21,7 +21,7 @@ steps:
     stage: release
     image: codefresh/cli
     commands:
-      - cf_export GITHUB_TOKEN=$(codefresh get context github-1 --decrypt -o yaml | yq -y .spec.data.auth.password)
+      - cf_export GITHUB_TOKEN=$(codefresh get context github --decrypt -o yaml | yq -y .spec.data.auth.password)
   ReleaseMyApp:
     title: Creating packages
     stage: release

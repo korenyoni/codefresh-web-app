@@ -16,13 +16,7 @@ steps:
     image: "golang:1.18"
     commands:
       - go build
-  GetGitToken:
-    title: Reading GitHub token
-    stage: release
-    image: codefresh/cli
-    commands:
-      - cf_export GITHUB_TOKEN=$(codefresh get context github --decrypt -o yaml | yq -y .spec.data.auth.password)
-  ReleaseMyApp:
+  ReleaseMyApp: # requires that GITHUB_TOKEN is set as an encrypted variable in CodeFresh (scope: repo)
     title: Creating packages
     stage: release
     image: "goreleaser/goreleaser"

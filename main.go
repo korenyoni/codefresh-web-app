@@ -1,11 +1,23 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
+	"os"
 )
 
+var envKeys = map[string]string{
+	"port": "PORT",
+}
+
 func main() {
+	port, err := getEnv(envKeys["port"])
+	if err != nil {
+		log.Fatal(err)
+	}
 	r := gin.Default()
 	r.StaticFile("/favicon.ico", "./site/favicon.ico")
 	r.StaticFile("/style.css", "./site/style.css")
@@ -20,9 +32,16 @@ func main() {
 	})
 	r.NoRoute(func(c *gin.Context) {
 		c.HTML(http.StatusOK, "404.tmpl", gin.H{
-			"homePage": "http://localhost:8080",
-			"logo":     "/logo.png",
+			"logo": "/logo.png",
 		})
 	})
-	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	r.Run(fmt.Sprintf(":%s", port))
+}
+
+func getEnv(key string) (string, error) {
+	val, ok := os.LookupEnv(key)
+	if !ok {
+		return "", errors.New(fmt.Sprintf("%s not set", key))
+	}
+	return val, nil
 }

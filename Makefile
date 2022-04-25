@@ -7,7 +7,7 @@ clean:
 	rm -rf $(build_path)
 
 run:
-	go run main.go
+	PORT=8080 go run main.go
 
 build:
 	GOOS=linux GOARCH=arm64 go build -o $(build_path)/$(name)-linux-arm64 main.go

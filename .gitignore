@@ -2,3 +2,6 @@ build/
 
 # IDE
 .idea/
+
+# Goreleaser
+codefresh-example-app

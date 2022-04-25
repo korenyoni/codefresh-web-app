@@ -1,7 +1,9 @@
-build_path = build
-name = webapp
+build_path 	= build
+name 		= webapp
+github_org 	= korenyoni
+github_repo = codefresh-example-app
 
-.PHONY: all build
+.PHONY: all build docker-build
 
 clean:
 	rm -rf $(build_path)
@@ -15,4 +17,7 @@ build:
 	GOOS=darwin GOARCH=arm64 go build -o $(build_path)/$(name)-darwin-arm64 main.go
 	GOOS=darwin GOARCH=amd64 go build -o $(build_path)/$(name)-darwin-amd64 main.go
 
-all: clean build
+docker-build:
+	docker build --build-arg GITHUB_ORG=$(github_org) --build-arg GITHUB_REPO=$(github_repo) .
+
+all: clean build docker-build

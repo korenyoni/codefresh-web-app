@@ -17,3 +17,4 @@ steps:
     working_directory: ./
     tag: modules
     dockerfile: Dockerfile
+    disable_push: 'match("${{CF_BRANCH}}", "master", false) == false'

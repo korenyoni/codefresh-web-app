@@ -1,7 +1,6 @@
 version: "1.0"
 stages:
-  - checkout
-  - test
+  - prepare
   - build
 steps:
   main_clone:

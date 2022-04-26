@@ -45,8 +45,14 @@ EOF
 
 echo "${color_cyan}Running integration tests:${color_white}"
 
+# main endpoints
 test_endpoint "health-check" "200"
 test_endpoint "" "200" # index
-test_endpoint "asdkasldjal" "404" # nonexistant page
+# misc assets
+test_endpoint "favicon.ico" "200"
+test_endpoint "style.css" "200"
+test_endpoint "index.html" "200"
+# 404
+test_endpoint "asdkasldjal" "404"
 
 echo ${separator}

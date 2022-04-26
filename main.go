@@ -1,9 +1,11 @@
 package main
 
 import (
+	"embed"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -12,6 +14,9 @@ import (
 var envKeys = map[string]string{
 	"port": "PORT",
 }
+
+//go:embed site/*
+var f embed.FS
 
 func getEnv(key string) (string, error) {
 	val, ok := os.LookupEnv(key)
@@ -23,10 +28,10 @@ func getEnv(key string) (string, error) {
 
 func BuildRouter() *gin.Engine {
 	router := gin.Default()
-	router.StaticFile("/favicon.ico", "./site/favicon.ico")
-	router.StaticFile("/style.css", "./site/style.css")
-	router.StaticFile("/logo.png", "./site/logo.png")
-	router.LoadHTMLGlob("site/templates/*")
+	router.StaticFS("/site", http.FS(f))
+	tmpl := template.Must(template.New("").ParseFS(f, "site/templates/*.tmpl"))
+	router.SetHTMLTemplate(tmpl)
+
 	router.GET("/", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "index.tmpl", gin.H{
 			"sourceCodeURI": "https://github.com/korenyoni/codefresh-web-app-test",
@@ -34,14 +39,44 @@ func BuildRouter() *gin.Engine {
 			"logo":          "/logo.png",
 		})
 	})
+
 	router.GET("/health-check", func(c *gin.Context) {
 		c.String(http.StatusOK, "alive")
 	})
+
 	router.NoRoute(func(c *gin.Context) {
 		c.HTML(http.StatusNotFound, "404.tmpl", gin.H{
 			"logo": "/logo.png",
 		})
 	})
+
+	router.GET("favicon.ico", func(c *gin.Context) {
+		file, _ := f.ReadFile("site/favicon.ico")
+		c.Data(
+			http.StatusOK,
+			"image/x-icon",
+			file,
+		)
+	})
+
+	router.GET("logo.png", func(c *gin.Context) {
+		file, _ := f.ReadFile("site/logo.png")
+		c.Data(
+			http.StatusOK,
+			"image/png",
+			file,
+		)
+	})
+
+	router.GET("style.css", func(c *gin.Context) {
+		file, _ := f.ReadFile("site/style.css")
+		c.Data(
+			http.StatusOK,
+			"text/css",
+			file,
+		)
+	})
+
 	return router
 }
 

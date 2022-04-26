@@ -41,7 +41,7 @@ func BuildRouter() *gin.Engine {
 	})
 
 	router.GET("/health-check", func(c *gin.Context) {
-		c.String(http.StatusOK, "alive")
+		c.JSON(http.StatusOK, gin.H{"status": "alive"})
 	})
 
 	router.NoRoute(func(c *gin.Context) {

@@ -1,0 +1,47 @@
+version: "1.0"
+mode: parallel
+services:
+  name: codefresh-web-app
+  composition:
+    codefresh-web-app:
+      image: docker.io/${{EVENT_NAMESPACE}}/${{EVENT_NAME}}:${{EVENT_TAG}}
+      ports:
+        - 8080
+  readiness:
+    image: alpine/curl:3.14
+    timeoutSeconds: 30
+    commands:
+      - "curl codefresh-web-app:8080"
+steps:
+  init:
+    image: alpine:3.15
+    title: init
+    working_directory: IMAGE_WORK_DIR
+    commands:
+      - apk add curl
+      - apk add jq
+
+  smoke-test-health-check:
+    image: alpine:3.15
+    title: smoke-test-health-check
+    commands:
+      - "[[ $(curl codefresh-web-app:8080/health-check | jq -r .status) == alive ]]"
+      - "[[ $(curl -o /dev/null -sw '%{http_code}' codefresh-web-app:8080/health-check) == 200 ]]"
+    services:
+      - codefresh-web-app
+
+  smoke-test-index:
+    image: alpine:3.15
+    title: smoke-test-index
+    commands:
+      - "[[ $(curl -o /dev/null -sw '%{http_code}' codefresh-web-app:8080/) == 200 ]]"
+    services:
+      - codefresh-web-app
+
+  smoke-test-404:
+    image: alpine:3.15
+    title: smoke-test-404
+    commands:
+      - "[[ $(curl -o /dev/null -sw '%{http_code}' codefresh-web-app:8080/asdkasldjal) == 404 ]]"
+    services:
+      - codefresh-web-app

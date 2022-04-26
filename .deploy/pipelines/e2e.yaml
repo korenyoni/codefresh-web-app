@@ -5,6 +5,7 @@ steps:
     type: git-clone
     repo: "${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}"
     revision: "${{CF_REVISION}}"
+
   AppDockerImage:
     title: Building Docker Image
     type: build
@@ -13,10 +14,11 @@ steps:
     dockerfile: Dockerfile
     disable_push: true # only for e2e test
 
-  run_integration_tests:
+  RunIntegrationTests:
     title: Run Integration Tests
     image: "alpine:3.15"
     commands:
+      - apk add curl jq bash
       - .deploy/pipelines/scripts/integration/test.sh
     services:
       name: codefresh-web-app

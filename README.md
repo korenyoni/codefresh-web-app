@@ -1,6 +1,6 @@
 # Codefresh Web App
 
-![badge](https://g.codefresh.io/api/badges/pipeline/korenyoni/codefresh-web-app%2Fdocker-build)
+![badge](https://g.codefresh.io/api/badges/pipeline/korenyoni/codefresh-web-app%2Fci)
 
 A simple web application built and deployed on [Codefresh.io](https://codefresh.io/).
 

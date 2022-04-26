@@ -3,7 +3,7 @@ stages:
   - prepare
   - build
   - test
-  - scan
+  # - scan (see below)
 steps:
   main_clone:
     title: "Cloning main repository..."
@@ -39,13 +39,11 @@ steps:
         timeoutSeconds: 30
         commands:
           - "curl codefresh-web-app:8080"
-
-  aqua_scan:
-    image: aquasec/trivy:0.27.0
-    stage: scan
-    title: "Scanning image for security vulnerabilities"
-    environment:
-      - TRIVY_CACHE_DIR=/tmp/.trivy
-    commands:
-      - trivy --cache-dir $TRIVY_CACHE_DIR i --download-db-only
-      - trivy --cache-dir $TRIVY_CACHE_DIR i "${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}"
+# CANNOT USE THE FOLLOWING STEP IN A SAAS ENVIRONMENT
+#
+#  aqua_scan:
+#    image: aquasec/trivy:0.27.0
+#    stage: scan
+#    title: "Scanning image for security vulnerabilities"
+#    commands:
+#      - trivy i --exit-code 1 "${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}"

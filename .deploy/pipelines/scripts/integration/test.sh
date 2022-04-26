@@ -1,17 +1,52 @@
 #!/bin/bash
 
-service_name="codefresh-web-app"
-service_port="8080"
+# If running on Alpine, this script requires the following packages:
+# * curl
+# * ncurses
+# * bash
 
-echo "Testing ${service_name}:${service_port}/health-check ..."
+color_red=$(tput setaf 1)
+color_green=$(tput setaf 2)
+color_cyan=$(tput setaf 6)
+color_white=$(tput setaf 7)
+separator="------------------------------"
 
-[[ "$(curl ${service_name}:${service_port}/health-check | jq -r .status)" == "alive" ]]
-[[ "$(curl -o /dev/null -sw '%{http_code}' ${service_name}:${service_port}/health-check)" == "200" ]]
+if [ $# -lt 2 ]; then
+    cat <<EOF
+${color_red}
+ERROR: Incorrect number of arguments supplied
+Usage: ./test.sh [HOSTNAME] [PORT]
+EOF
+    exit 1
+fi
 
-echo "Testing ${service_name}:${service_port}/ ..."
+service_name="$1"
+service_port="$2"
 
-[[ "$(curl -o /dev/null -sw '%{http_code}' ${service_name}:${service_port}/)" == "200" ]]
+function test_endpoint() {
+  endpoint=$1
+  expected_status_code=$2
+  status_code="$(curl -o /dev/null -sw '%{http_code}' ${service_name}:${service_port}/${endpoint})"
+  result=""
+  if [[ "${status_code}" == "${expected_status_code}" ]]; then
+    result="${color_green}Success.${color_white}"
+  else
+    result="${color_red}Failure.${color_white}"
+  fi
 
-echo "Testing ${service_name}:${service_port}/asdkasldjal ..."
+  cat <<EOF
+${separator}
+${color_cyan}Testing endpoint:${color_white} ${service_name}:${service_port}/${endpoint}
+${color_cyan}Expected status code:${color_white} ${expected_status_code}
+${color_cyan}Status code:${color_white} ${status_code}
+${color_cyan}Result:${color_white} ${result}
+EOF
+}
 
-[[ "$(curl -o /dev/null -sw '%{http_code}' ${service_name}:${service_port}/asdkasldjal)" == "404" ]]
+echo "${color_cyan}Running integration tests:${color_white}"
+
+test_endpoint "health-check" "200"
+test_endpoint "" "200" # index
+test_endpoint "asdkasldjal" "404" # nonexistant page
+
+echo ${separator}

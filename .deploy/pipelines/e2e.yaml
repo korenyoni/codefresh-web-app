@@ -18,8 +18,8 @@ steps:
     title: Run Integration Tests
     image: "alpine:3.15"
     commands:
-      - apk add curl jq bash
-      - .deploy/pipelines/scripts/integration/test.sh
+      - apk add curl bash ncurses
+      - .deploy/pipelines/scripts/integration/test.sh codefresh-web-app 8080
     services:
       name: codefresh-web-app
       composition:

@@ -4,7 +4,7 @@ services:
   name: codefresh-web-app
   composition:
     codefresh-web-app:
-      image: docker.io/${{EVENT_NAMESPACE}}/${{EVENT_NAME}}:${{EVENT_TAG}}
+      image: ${{AppDockerImage}}
       ports:
         - 8080
   readiness:
@@ -12,19 +12,21 @@ services:
     timeoutSeconds: 30
     commands:
       - "curl codefresh-web-app:8080"
+
 steps:
-  init:
-    image: alpine:3.15
-    title: init
-    working_directory: IMAGE_WORK_DIR
-    commands:
-      - apk add curl
-      - apk add jq
+  AppDockerImage:
+    title: Building Docker Image
+    type: build
+    image_name: "${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}"
+    working_directory: ./
+    dockerfile: Dockerfile
+    disable_push: true # only for e2e test
 
   smoke-test-health-check:
-    image: ${{init}}
     title: smoke-test-health-check
+    image: alpine/curl:3.14
     commands:
+      - apk add jq
       - "[[ $(curl codefresh-web-app:8080/health-check | jq -r .status) == alive ]]"
       - "[[ $(curl -o /dev/null -sw '%{http_code}' codefresh-web-app:8080/health-check) == 200 ]]"
     services:
@@ -36,8 +38,8 @@ steps:
             - success
 
   smoke-test-index:
-    image: ${{init}}
     title: smoke-test-index
+    image: alpine/curl:3.14
     commands:
       - "[[ $(curl -o /dev/null -sw '%{http_code}' codefresh-web-app:8080/) == 200 ]]"
     services:
@@ -49,8 +51,8 @@ steps:
             - success
 
   smoke-test-404:
-    image: ${{init}}
     title: smoke-test-404
+    image: alpine/curl:3.14
     commands:
       - "[[ $(curl -o /dev/null -sw '%{http_code}' codefresh-web-app:8080/asdkasldjal) == 404 ]]"
     services:

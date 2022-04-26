@@ -3,6 +3,7 @@ mode: parallel
 stages:
   - prepare
   - unit-test
+  - lint
 steps:
   main_clone:
     title: "Cloning main repository..."
@@ -16,6 +17,17 @@ steps:
     image: "golang:1.18"
     commands:
       - go test -v
+    when:
+      steps:
+        - name: main_clone
+          on:
+            - success
+  GoLint:
+    title: Lint
+    stage: lint
+    image: "golangci/golangci-lint:v1.45.2"
+    commands:
+      - golangci-lint run
     when:
       steps:
         - name: main_clone

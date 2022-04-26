@@ -6,7 +6,6 @@ import (
 	"testing"
 )
 
-var addr string = ":8080"
 var path404 string = "/askdasjldka"
 
 func TestIndexHandler(t *testing.T) {

@@ -30,6 +30,11 @@ steps:
       - "[[ $(curl -o /dev/null -sw '%{http_code}' codefresh-web-app:8080/health-check) == 200 ]]"
     services:
       - codefresh-web-app
+    when:
+      steps:
+        - name: init
+          on:
+            - success
 
   smoke-test-index:
     image: alpine:3.15
@@ -39,6 +44,11 @@ steps:
       - "[[ $(curl -o /dev/null -sw '%{http_code}' codefresh-web-app:8080/) == 200 ]]"
     services:
       - codefresh-web-app
+    when:
+      steps:
+        - name: init
+          on:
+            - success
 
   smoke-test-404:
     image: alpine:3.15
@@ -48,3 +58,8 @@ steps:
       - "[[ $(curl -o /dev/null -sw '%{http_code}' codefresh-web-app:8080/asdkasldjal) == 404 ]]"
     services:
       - codefresh-web-app
+    when:
+      steps:
+        - name: init
+          on:
+            - success

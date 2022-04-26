@@ -22,3 +22,17 @@ $ PORT=8080 ./codefresh-web-app
 $ make docker-build
 $ docker run -p 8080:8080 korenyoni/codefresh-web-app
 ```
+
+## Developing Locally
+
+### Install `pre-commit` Git Hook Scripts
+
+```bash
+$ pre-commit install
+```
+
+### Run App Locally
+
+```bash
+$ make run
+```

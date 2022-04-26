@@ -15,7 +15,7 @@ var envKeys = map[string]string{
 	"port": "PORT",
 }
 
-//go:embed site/*
+//go:embed site/* site/templates/*
 var f embed.FS
 
 func getEnv(key string) (string, error) {

@@ -1,19 +1,10 @@
 version: "1.0"
-mode: parallel
-services:
-  name: codefresh-web-app
-  composition:
-    codefresh-web-app:
-      image: ${{AppDockerImage}}
-      ports:
-        - 8080
-  readiness:
-    image: alpine/curl:3.14
-    timeoutSeconds: 30
-    commands:
-      - "curl codefresh-web-app:8080"
-
 steps:
+  main_clone:
+    title: "Cloning main repository..."
+    type: git-clone
+    repo: "${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}"
+    revision: "${{CF_REVISION}}"
   AppDockerImage:
     title: Building Docker Image
     type: build
@@ -22,43 +13,20 @@ steps:
     dockerfile: Dockerfile
     disable_push: true # only for e2e test
 
-  smoke-test-health-check:
-    title: smoke-test-health-check
-    image: alpine/curl:3.14
+  run_integration_tests:
+    title: Run Integration Tests
+    image: "alpine:3.15"
     commands:
-      - apk add jq
-      - "[[ $(curl codefresh-web-app:8080/health-check | jq -r .status) == alive ]]"
-      - "[[ $(curl -o /dev/null -sw '%{http_code}' codefresh-web-app:8080/health-check) == 200 ]]"
+      - .deploy/pipelines/scripts/integration/test.sh
     services:
-      - codefresh-web-app
-    when:
-      steps:
-        - name: init
-          on:
-            - success
-
-  smoke-test-index:
-    title: smoke-test-index
-    image: alpine/curl:3.14
-    commands:
-      - "[[ $(curl -o /dev/null -sw '%{http_code}' codefresh-web-app:8080/) == 200 ]]"
-    services:
-      - codefresh-web-app
-    when:
-      steps:
-        - name: init
-          on:
-            - success
-
-  smoke-test-404:
-    title: smoke-test-404
-    image: alpine/curl:3.14
-    commands:
-      - "[[ $(curl -o /dev/null -sw '%{http_code}' codefresh-web-app:8080/asdkasldjal) == 404 ]]"
-    services:
-      - codefresh-web-app
-    when:
-      steps:
-        - name: init
-          on:
-            - success
+      name: codefresh-web-app
+      composition:
+        codefresh-web-app:
+          image: ${{AppDockerImage}}
+          ports:
+            - 8080
+      readiness:
+        image: alpine/curl:3.14
+        timeoutSeconds: 30
+        commands:
+          - "curl codefresh-web-app:8080"

@@ -3,6 +3,8 @@ mode: parallel
 stages:
   - prepare
   - unit-test
+  - lint
+  - scan
 steps:
   main_clone:
     title: "Cloning main repository..."
@@ -10,12 +12,37 @@ steps:
     repo: "${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}"
     revision: "${{CF_REVISION}}"
     stage: prepare
+
   UnitTests:
     title: Unit test
     stage: unit-test
     image: "golang:1.18"
     commands:
       - go test -v
+    when:
+      steps:
+        - name: main_clone
+          on:
+            - success
+
+  GolangCILint:
+    title: Lint
+    stage: lint
+    image: "golangci/golangci-lint:v1.45.2"
+    commands:
+      - golangci-lint run --timeout 5m
+    when:
+      steps:
+        - name: main_clone
+          on:
+            - success
+
+  aqua_scan:
+    image: aquasec/trivy:0.27.0
+    stage: scan
+    title: "Scanning filesystem for security vulnerabilities"
+    commands:
+      - trivy filesystem --exit-code 1 .
     when:
       steps:
         - name: main_clone

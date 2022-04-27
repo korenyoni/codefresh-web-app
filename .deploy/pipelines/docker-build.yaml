@@ -2,6 +2,8 @@ version: "1.0"
 stages:
   - prepare
   - build
+  - test
+  # - scan (see below)
 steps:
   main_clone:
     title: "Cloning main repository..."
@@ -9,11 +11,39 @@ steps:
     repo: "${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}"
     revision: "${{CF_REVISION}}"
     stage: prepare
+
   AppDockerImage:
     title: Building Docker Image
     type: build
     stage: build
     image_name: "${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}"
     working_directory: ./
-    tag: modules
     dockerfile: Dockerfile
+
+  RunIntegrationTests:
+    title: Run Integration Tests
+    image: "alpine:3.15"
+    stage: test
+    commands:
+      - apk add curl bash ncurses
+      - .deploy/pipelines/scripts/integration/test.sh codefresh-web-app 8080
+    services:
+      name: codefresh-web-app
+      composition:
+        codefresh-web-app:
+          image: ${{AppDockerImage}}
+          ports:
+            - 8080
+      readiness:
+        image: alpine/curl:3.14
+        timeoutSeconds: 30
+        commands:
+          - "curl codefresh-web-app:8080"
+# CANNOT USE THE FOLLOWING STEP IN A SAAS ENVIRONMENT
+#
+#  aqua_scan:
+#    image: aquasec/trivy:0.27.0
+#    stage: scan
+#    title: "Scanning image for security vulnerabilities"
+#    commands:
+#      - trivy i --exit-code 1 "${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}"
